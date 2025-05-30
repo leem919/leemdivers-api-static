@@ -1,1 +1,1 @@
-/api/:file  /api/:file.json  200!
+/api/:file  /api/:splat.json  200!
