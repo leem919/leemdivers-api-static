@@ -1,1 +1,2 @@
+/api/Account/Login    /.netlify/functions/account-login    200    Method=POST
 /api/*   /api/:splat.json   200
