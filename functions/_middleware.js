@@ -1,36 +1,27 @@
 export async function onRequest(context) {
-  const url = new URL(context.request.url);
-  const pathname = url.pathname;
+  const { request, next } = context;
+  const url = new URL(request.url);
 
-  // 1. Handle only the specific API POST route
+  // 1. Respond "success" for POST /api/Account/Login
   if (
-    pathname === "/api/Account/Login" &&
-    context.request.method === "POST"
+    url.pathname === "/api/Account/Login" &&
+    request.method.toUpperCase() === "POST"
   ) {
-    const data = await context.request.json();
-    // Put your login/authentication logic here
-    return new Response(
-      JSON.stringify({ received: true, yourData: data }),
-      { headers: { "Content-Type": "application/json" } }
-    );
+    return new Response("success", {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 
-  // 2. Redirect extensionless, non-API paths to .json
-  // Conditions:
-  // - Not an /api path
-  // - Not ending with /
-  // - Not ending with .json
-  // - Not ending with any other file extension
+  // 2. Redirect all other requests (except those ending in .json or /api/Account/Login) to .json endpoint
   if (
-    !pathname.startsWith("/api/") &&
-    !pathname.endsWith("/") &&
-    !pathname.endsWith(".json") &&
-    !pathname.match(/\.[a-zA-Z0-9]+$/)
+    !url.pathname.endsWith(".json") &&
+    url.pathname !== "/api/Account/Login"
   ) {
-    url.pathname = `${pathname}.json`;
-    return Response.redirect(url.toString(), 302);
+    url.pathname = url.pathname + ".json";
+    return Response.redirect(url.toString(), 301);
   }
 
-  // 3. Pass through everything else
-  return context.next();
+  // Otherwise, continue to next handler
+  return next();
 }
