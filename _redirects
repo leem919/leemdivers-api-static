@@ -1,0 +1,2 @@
+/api/:name   /api/:name.json   200
+POST /api/Account/Login   /.netlify/functions/Account_Login   200
