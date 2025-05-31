@@ -1,7 +1,7 @@
 export default async (request, context) => {
   const url = new URL(request.url);
 
-  // 1. Respond to POST /api/Account/Login
+  // 1. Handle /api/Account/Login as a POST endpoint
   if (
     url.pathname === "/api/Account/Login" &&
     request.method === "POST"
@@ -12,15 +12,24 @@ export default async (request, context) => {
     });
   }
 
-  // 2. Redirect all other requests (except those ending in .json or /api/Account/Login) to .json
+  // 2. Try to map /foo to /foo.json (but only if /foo.json exists)
   if (
     !url.pathname.endsWith(".json") &&
     url.pathname !== "/api/Account/Login"
   ) {
-    url.pathname = url.pathname + ".json";
-    return Response.redirect(url.toString(), 301);
+    // Try to fetch the .json file from your published site assets
+    const jsonPath = url.pathname.replace(/\/$/, "") + ".json";
+    const assetUrl = new URL(jsonPath, url.origin);
+
+    // Try to HEAD the file to see if it exists
+    const res = await fetch(assetUrl, { method: "HEAD" });
+    if (res.ok) {
+      // Rewrite the request to /foo.json
+      url.pathname = jsonPath;
+      return context.rewrite(url.pathname);
+    }
   }
 
-  // Otherwise, continue to next handler or asset
+  // 3. Fall through to default handling
   return context.next();
 };

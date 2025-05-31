@@ -1,0 +1,8 @@
+{
+  "functions": [
+    {
+      "function": "middleware",
+      "path": "/*"
+    }
+  ]
+}
