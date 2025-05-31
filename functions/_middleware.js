@@ -7,9 +7,9 @@ export async function onRequest(context) {
     url.pathname === "/api/Account/Login" &&
     request.method.toUpperCase() === "POST"
   ) {
-    return new Response("success", {
+    return new Response(JSON.stringify({ message: "success" }), {
       status: 200,
-      headers: { "Content-Type": "text/plain" },
+      headers: { "Content-Type": "application/json" },
     });
   }
 
