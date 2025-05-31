@@ -1,14 +1,35 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
+  const pathname = url.pathname;
 
-  // Only redirect if the path does NOT already end with .json and does NOT look like a directory
-  if (!url.pathname.endsWith('.json') && !url.pathname.endsWith('/')) {
-    // Optionally, exclude extensions (like .css, .js, etc.) if you only want to redirect extensionless paths
-    if (!url.pathname.match(/\.[a-zA-Z0-9]+$/)) {
-      url.pathname = url.pathname + '.json';
-      return Response.redirect(url.toString(), 302); // 302 = temporary; use 301 for permanent
-    }
+  // --- 1. Handle /api/Account/Login POST requests ---
+  if (
+    pathname === "/api/Account/Login" &&
+    context.request.method === "POST"
+  ) {
+    const data = await context.request.json();
+    // Your login logic here. Example placeholder:
+    return new Response(
+      JSON.stringify({ received: true, yourData: data }),
+      { headers: { "Content-Type": "application/json" } }
+    );
   }
-  // Otherwise, continue as normal
+
+  // --- 2. Redirect extensionless requests to .json ---
+  // Don't redirect if:
+  // - The path ends with .json
+  // - The path ends with /
+  // - The path looks like it already has a file extension
+  if (
+    !pathname.endsWith(".json") &&
+    !pathname.endsWith("/") &&
+    !pathname.match(/\.[a-zA-Z0-9]+$/) &&
+    !pathname.startsWith("/api/")
+  ) {
+    url.pathname = pathname + ".json";
+    return Response.redirect(url.toString(), 302);
+  }
+
+  // --- 3. Default: pass through ---
   return context.next();
 }
